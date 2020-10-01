@@ -42,13 +42,13 @@ lis = makeTokenParser
   )
 
 ----------------------------------
---- Parser de expressiones enteras
+--- Parser de expresiones enteras
 -----------------------------------
 intexp :: Parser (Exp Int)
 intexp = undefined
 
 -----------------------------------
---- Parser de expressiones booleanas
+--- Parser de expresiones booleanas
 ------------------------------------
 
 boolexp :: Parser (Exp Bool)
