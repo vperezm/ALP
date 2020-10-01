@@ -15,7 +15,7 @@ data Exp a where
   Div ::Exp Int -> Exp Int -> Exp Int
   EAssgn ::Variable -> Exp Int -> Exp Int
   ESeq ::Exp Int -> Exp Int -> Exp Int
-  -- Expreseiones booleanas
+  -- Expresiones booleanas
   BTrue ::Exp Bool
   BFalse ::Exp Bool
   Lt ::Exp Int -> Exp Int -> Exp Bool
