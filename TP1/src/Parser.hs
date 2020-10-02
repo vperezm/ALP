@@ -41,7 +41,7 @@ lis = makeTokenParser
     }
   )
 
-----------------------------------
+-----------------------------------
 --- Parser de expresiones enteras
 -----------------------------------
 
@@ -57,7 +57,7 @@ var = do v <- identifier lis
 
 uminus :: Parser (Exp Int)
 uminus = do reservedOp lis "-"
-            e <- intexp
+            e <- factor
             return (UMinus e)
 
 factor :: Parser (Exp Int)
@@ -96,24 +96,85 @@ assgn = do v <- identifier lis
            e <- expr
            return (EAssgn v e)
 
-eseq :: Parser (Exp Int)
-eseq = chainl1 (try assgn <|> expr) (do {reservedOp lis ","; return (ESeq)})
-
+eseq = do reservedOp lis ","
+          return (ESeq)
 
 ext :: Parser (Exp Int)
-ext = eseq
+ext = chainl1 (try assgn <|> expr) eseq
 
 -- Intexp
 
 intexp :: Parser (Exp Int)
 intexp = ext
 
------------------------------------
+------------------------------------
 --- Parser de expresiones booleanas
 ------------------------------------
 
+-- Bool
+
+true :: Parser (Exp Bool)
+true = do reservedOp lis "true"
+          return (BTrue)
+
+false :: Parser (Exp Bool)         
+false = do reservedOp lis "false"
+           return (BFalse)
+
+bool :: Parser (Exp Bool)
+bool = try (parens lis boolexp)
+       <|> try true
+       <|> false
+         
+-- Binary         
+         
+andd = do reservedOp lis "&&"
+          return (And)
+
+orr = do reservedOp lis "||"
+         return (Or)
+         
+binary = try andd
+         <|> orr
+         
+-- Unary
+
+nott :: Parser (Exp Bool)                           
+nott = do reservedOp lis "!"
+          e <- bool
+          return (Not e)
+        
+unary :: Parser (Exp Bool)        
+unary = try nott    
+        <|> bool
+
+-- Comparison
+         
+lt = do reservedOp lis "<"
+        return (Lt)
+
+gt = do reservedOp lis ">"
+        return (Gt)
+        
+eq = do reservedOp lis "=="
+        return (Eq)
+
+neq = do reservedOp lis "!="
+         return (NEq)
+         
+comparison :: Parser (Exp Bool)         
+comparison = do m <- intexp
+                e <- try lt
+                     <|> try gt
+                     <|> try eq
+                     <|> neq
+                n <- intexp
+                return (e m n)
+             
+-- Boolexp
+
 boolexp :: Parser (Exp Bool)
-boolexp = undefined
+boolexp = chainl1 (try comparison <|> unary) binary
 
 -----------------------------------
 --- Parser de comandos
