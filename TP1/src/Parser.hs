@@ -93,7 +93,7 @@ expr = chainl1 term (try plus <|> bminus)
 assgn :: Parser (Exp Int)
 assgn = do v <- identifier lis
            reservedOp lis "="
-           e <- expr
+           e <- (try assgn <|> expr)
            return (EAssgn v e)
 
 eseq = do reservedOp lis ","
@@ -117,7 +117,7 @@ true :: Parser (Exp Bool)
 true = do reservedOp lis "true"
           return (BTrue)
 
-false :: Parser (Exp Bool)         
+false :: Parser (Exp Bool)
 false = do reservedOp lis "false"
            return (BFalse)
 
@@ -125,44 +125,44 @@ bool :: Parser (Exp Bool)
 bool = try (parens lis boolexp)
        <|> try true
        <|> false
-         
--- Binary         
-         
+
+-- Binary
+
 andd = do reservedOp lis "&&"
           return (And)
 
 orr = do reservedOp lis "||"
          return (Or)
-         
+
 binary = try andd
          <|> orr
-         
+
 -- Unary
 
-nott :: Parser (Exp Bool)                           
+nott :: Parser (Exp Bool)
 nott = do reservedOp lis "!"
           e <- bool
           return (Not e)
-        
-unary :: Parser (Exp Bool)        
-unary = try nott    
+
+unary :: Parser (Exp Bool)
+unary = try nott
         <|> bool
 
 -- Comparison
-         
+
 lt = do reservedOp lis "<"
         return (Lt)
 
 gt = do reservedOp lis ">"
         return (Gt)
-        
+
 eq = do reservedOp lis "=="
         return (Eq)
 
 neq = do reservedOp lis "!="
          return (NEq)
-         
-comparison :: Parser (Exp Bool)         
+
+comparison :: Parser (Exp Bool)
 comparison = do m <- intexp
                 e <- try lt
                      <|> try gt
@@ -170,7 +170,7 @@ comparison = do m <- intexp
                      <|> neq
                 n <- intexp
                 return (e m n)
-             
+
 -- Boolexp
 
 boolexp :: Parser (Exp Bool)
