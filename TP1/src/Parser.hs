@@ -44,8 +44,69 @@ lis = makeTokenParser
 ----------------------------------
 --- Parser de expresiones enteras
 -----------------------------------
+
+-- Factor
+
+nat :: Parser (Exp Int)
+nat = do n <- natural lis
+         return (Const (fromIntegral n))
+
+var :: Parser (Exp Int)
+var = do v <- identifier lis
+         return (Var v)
+
+uminus :: Parser (Exp Int)
+uminus = do reservedOp lis "-"
+            e <- intexp
+            return (UMinus e)
+
+factor :: Parser (Exp Int)
+factor = try uminus
+         <|> try (parens lis intexp)
+         <|> try nat
+         <|> var
+
+-- Term
+
+times = do reservedOp lis "*"
+           return (Times)
+
+divi = do reservedOp lis "/"
+          return (Div)
+
+term :: Parser (Exp Int)
+term = chainl1 factor (try times <|> divi)
+
+-- Expr
+
+plus = do reservedOp lis "+"
+          return (Plus)
+
+bminus = do reservedOp lis "-"
+            return (Minus)
+
+expr :: Parser (Exp Int)
+expr = chainl1 term (try plus <|> bminus)
+
+-- Extended
+
+assgn :: Parser (Exp Int)
+assgn = do v <- identifier lis
+           reservedOp lis "="
+           e <- expr
+           return (EAssgn v e)
+
+eseq :: Parser (Exp Int)
+eseq = chainl1 (try assgn <|> expr) (do {reservedOp lis ","; return (ESeq)})
+
+
+ext :: Parser (Exp Int)
+ext = eseq
+
+-- Intexp
+
 intexp :: Parser (Exp Int)
-intexp = undefined
+intexp = ext
 
 -----------------------------------
 --- Parser de expresiones booleanas
