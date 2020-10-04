@@ -114,28 +114,17 @@ intexp = ext
 -- Bool
 
 true :: Parser (Exp Bool)
-true = do reservedOp lis "true"
+true = do reserved lis "true"
           return (BTrue)
 
 false :: Parser (Exp Bool)
-false = do reservedOp lis "false"
+false = do reserved lis "false"
            return (BFalse)
 
 bool :: Parser (Exp Bool)
 bool = try (parens lis boolexp)
        <|> try true
        <|> false
-
--- Binary
-
-andd = do reservedOp lis "&&"
-          return (And)
-
-orr = do reservedOp lis "||"
-         return (Or)
-
-binary = try andd
-         <|> orr
 
 -- Unary
 
@@ -171,10 +160,18 @@ comparison = do m <- intexp
                 n <- intexp
                 return (e m n)
 
+-- Binary
+
+andd = do reservedOp lis "&&"
+          return (And)
+
+orr = do reservedOp lis "||"
+         return (Or)
+
 -- Boolexp
 
 boolexp :: Parser (Exp Bool)
-boolexp = chainl1 (try comparison <|> unary) binary
+boolexp = chainl1 (chainl1 (try unary <|> comparison) andd) orr
 
 -----------------------------------
 --- Parser de comandos
@@ -184,7 +181,7 @@ comm :: Parser Comm
 comm = undefined
 
 ------------------------------------
--- Función de parseo
+--- Función de parseo
 ------------------------------------
 parseComm :: SourceName -> String -> Either ParseError Comm
 parseComm = parse (totParser comm)
