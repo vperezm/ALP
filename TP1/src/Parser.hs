@@ -177,8 +177,47 @@ boolexp = chainl1 (chainl1 (try unary <|> comparison) andd) orr
 --- Parser de comandos
 -----------------------------------
 
+-- Skip
+skipp :: Parser Comm
+skipp = do reservedOp lis "skip"
+           return (Skip)
+
+-- If
+
+iff :: Parser Comm
+iff = do reserved lis "if"
+         b <- boolexp
+         t <- braces lis comm
+         try (do reserved lis "else"
+                 f <- braces lis comm
+                 return (IfThenElse b t f))
+             <|> return (IfThen b t)
+
+-- While
+
+while :: Parser Comm
+while = do reserved lis "while"
+           b <- boolexp
+           c <- braces lis comm
+           return (While b c)
+
+-- Let
+
+lett :: Parser Comm
+lett = do v <- identifier lis
+          reservedOp lis "="
+          e <- intexp
+          return (Let v e)
+
+-- Seq
+
+seqq = do reservedOp lis ";"
+          return (Seq)
+
+-- Comm
+
 comm :: Parser Comm
-comm = undefined
+comm = chainl1 (try iff <|> try while <|> try skipp <|> lett) seqq
 
 ------------------------------------
 --- Función de parseo
