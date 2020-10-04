@@ -178,6 +178,7 @@ boolexp = chainl1 (chainl1 (try unary <|> comparison) andd) orr
 -----------------------------------
 
 -- Skip
+
 skipp :: Parser Comm
 skipp = do reserved lis "skip"
            return (Skip)
@@ -217,7 +218,7 @@ seqq = do reservedOp lis ";"
 -- Comm
 
 comm :: Parser Comm
-comm = chainl1 (try iff <|> try while <|> try skipp <|> lett) seqq
+comm = chainl1 (try skipp <|> try iff <|> try while <|> lett) seqq
 
 ------------------------------------
 --- Función de parseo
