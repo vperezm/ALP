@@ -179,7 +179,7 @@ boolexp = chainl1 (chainl1 (try unary <|> comparison) andd) orr
 
 -- Skip
 skipp :: Parser Comm
-skipp = do reservedOp lis "skip"
+skipp = do reserved lis "skip"
            return (Skip)
 
 -- If
