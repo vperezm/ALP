@@ -6,20 +6,20 @@ where
 
 import           AST
 import qualified Data.Map.Strict               as M
-import           Data.Strict.Tuple
+import           Data.Strict.Tuple             hiding (fst)
 
 -- Estados
 type State = (M.Map Variable Int, Integer)
 
 -- Estado nulo
--- Completar la definición
 initState :: State
-initState = undefined
+initState = (M.empty, 0)
 
 -- Busca el valor de una variable en un estado
--- Completar la definición
 lookfor :: Variable -> State -> Either Error Int
-lookfor v s = undefined
+lookfor v s = case M.lookup v (fst s) of
+                Just n  -> Right n
+                Nothing -> Left UndefVar
 
 -- Cambia el valor de una variable en un estado
 -- Completar la definición

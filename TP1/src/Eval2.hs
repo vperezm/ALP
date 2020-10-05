@@ -12,19 +12,18 @@ import           Data.Strict.Tuple
 type State = M.Map Variable Int
 
 -- Estado nulo
--- Completar la definición
 initState :: State
-initState = undefined
+initState = M.empty
 
 -- Busca el valor de una variable en un estado
--- Completar la definición
 lookfor :: Variable -> State -> Either Error Int
-lookfor v s = undefined
+lookfor v s = case M.lookup v s of
+                Just n  -> Right n
+                Nothing -> Left UndefVar
 
 -- Cambia el valor de una variable en un estado
--- Completar la definición
 update :: Variable -> Int -> State -> State
-update = undefined
+update = M.insert
 
 -- Evalúa un programa en el estado nulo
 eval :: Comm -> Either Error State
