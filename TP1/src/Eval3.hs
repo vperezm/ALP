@@ -6,7 +6,7 @@ where
 
 import           AST
 import qualified Data.Map.Strict               as M
-import           Data.Strict.Tuple             hiding (fst)
+import           Data.Strict.Tuple
 
 -- Estados
 type State = (M.Map Variable Int, Integer)
@@ -17,7 +17,7 @@ initState = (M.empty, 0)
 
 -- Busca el valor de una variable en un estado
 lookfor :: Variable -> State -> Either Error Int
-lookfor v s = case M.lookup v (fst s) of
+lookfor v s = case M.lookup v (Prelude.fst s) of
                 Just n  -> Right n
                 Nothing -> Left UndefVar
 

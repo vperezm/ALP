@@ -45,4 +45,40 @@ stepComm = undefined
 -- Evalúa una expresión
 -- Completar la definición
 evalExp :: Exp a -> State -> Either Error (Pair a State)
-evalExp = undefined
+evalExp (Const n)     s = Right (n :!: s)
+evalExp (Var v)       s = case lookfor v s of
+                            Left _  -> Left UndefVar
+                            Right n -> Right (n :!: s)
+evalExp (UMinus e)    s = case evalExp e s of
+                            Left r  -> Left r
+                            Right n -> Right (-(Data.Strict.Tuple.fst n) :!: Data.Strict.Tuple.snd n)
+evalExp (Plus e0 e1)  s = case evalExp e0 s of
+                            Left r   -> Left r
+                            Right n0 -> case evalExp e1 (Data.Strict.Tuple.snd n0) of
+                                          Left r   -> Left r
+                                          Right n1 -> Right ((Data.Strict.Tuple.fst n0) + (Data.Strict.Tuple.fst n1) :!: Data.Strict.Tuple.snd n1)
+evalExp (Minus e0 e1) s = case evalExp e0 s of
+                            Left r   -> Left r
+                            Right n0 -> case evalExp e1 (Data.Strict.Tuple.snd n0) of
+                                          Left r   -> Left r
+                                          Right n1 -> Right ((Data.Strict.Tuple.fst n0) - (Data.Strict.Tuple.fst n1) :!: Data.Strict.Tuple.snd n1)
+evalExp (Times e0 e1) s = case evalExp e0 s of
+                            Left r   -> Left r
+                            Right n0 -> case evalExp e1 (Data.Strict.Tuple.snd n0) of
+                                          Left r   -> Left r
+                                          Right n1 -> Right ((Data.Strict.Tuple.fst n0) * (Data.Strict.Tuple.fst n1) :!: Data.Strict.Tuple.snd n1)
+evalExp (Div e0 e1)   s = case evalExp e0 s of
+                            Left r   -> Left r
+                            Right n0 -> case evalExp e1 (Data.Strict.Tuple.snd n0) of
+                                          Left r   -> Left r
+                                          Right n1 -> case Data.Strict.Tuple.fst n1 of
+                                                        0 -> Left DivByZero
+                                                        _ -> Right ((Data.Strict.Tuple.fst n0) `div` (Data.Strict.Tuple.fst n1) :!: Data.Strict.Tuple.snd n1)
+evalExp (EAssgn v e)  s = case evalExp e s of
+                            Left r  -> Left r
+                            Right n -> Right (Data.Strict.Tuple.fst n :!: update v (Data.Strict.Tuple.fst n) (Data.Strict.Tuple.snd n))
+evalExp (ESeq e0 e1)  s = case evalExp e0 s of
+                            Left r   -> Left r
+                            Right n0 -> case evalExp e1 (Data.Strict.Tuple.snd n0) of
+                                          Left r   -> Left r
+                                          Right n1 -> Right (Data.Strict.Tuple.fst n1 :!: Data.Strict.Tuple.snd n1)
