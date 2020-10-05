@@ -32,7 +32,7 @@ eval p = stepCommStar p initState
 -- hasta alcanzar un Skip
 stepCommStar :: Comm -> State -> State
 stepCommStar Skip s = s
-stepCommStar c    s = T.uncurry stepCommStar $ stepComm c s
+stepCommStar c    s = Data.Strict.Tuple.uncurry stepCommStar $ stepComm c s
 
 -- Evalúa un paso de un comando en un estado dado
 stepComm :: Comm -> State -> Pair Comm State
