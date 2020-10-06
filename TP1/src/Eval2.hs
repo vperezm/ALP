@@ -48,13 +48,33 @@ stepComm (Seq c0 c1)          s = case stepComm c0 s of
                                     Left r             -> Left r
                                     Right (c0' :!: s') -> Right (Seq c0' c1 :!: s')
 stepComm (IfThenElse b c0 c1) s = case evalExp b s of
-                                    Left r            -> Left r
-                                    Right (b' :!: s') -> if b' then Right (c0 :!: s') else Right (c1 :!: s')
+                                    Left r               -> Left r
+                                    Right (True  :!: s') -> Right (c0 :!: s')
+                                    Right (False :!: s') -> Right (c1 :!: s')
 stepComm (While b c)          s = case evalExp b s of
-                                    Left r            -> Left r
-                                    Right (b' :!: s') -> if b' then Right (Seq c (While b c) :!: s') else Right (Skip :!: s')
+                                    Left r               -> Left r
+                                    Right (True  :!: s') -> Right (Seq c (While b c) :!: s')
+                                    Right (False :!: s') -> Right (Skip :!: s')
 
 -- Evalúa una expresión
+
+-- Funcioes auxiliares:
+-- Operadores binarios
+binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Either Error (Pair b State)
+binOp f e0 e1 s = case evalExp e0 s of
+                    Left r            -> Left r
+                    Right (n0 :!: s') -> case evalExp e1 s' of
+                                           Left r             -> Left r
+                                           Right (n1 :!: s'') -> Right (f n0 n1 :!: s'')
+-- División
+divv :: Int -> Int -> Int
+divv n0 n1 = case n1 of
+             0 -> error "División por 0"
+             _ -> n0 `div` n1
+-- Secuencia de expresiones enteras
+seqq :: Int -> Int -> Int
+seqq n0 n1 = n1
+
 evalExp :: Exp a -> State -> Either Error (Pair a State)
 -- Expresiones enteras
 evalExp (Const n)     s = Right (n :!: s)
@@ -64,69 +84,23 @@ evalExp (Var v)       s = case lookfor v s of
 evalExp (UMinus e)    s = case evalExp e s of
                             Left r           -> Left r
                             Right (n :!: s') -> Right (-n :!: s')
-evalExp (Plus e0 e1)  s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 + n1 :!: s'')
-evalExp (Minus e0 e1) s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 - n1 :!: s'')
-evalExp (Times e0 e1) s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 * n1 :!: s'')
-evalExp (Div e0 e1)   s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> case n1 of
-                                                                           0 -> error "División por 0"
-                                                                           _ -> Right (n0 `div` n1 :!: s'')
+evalExp (Plus e0 e1)  s = binOp (+)  e0 e1 s
+evalExp (Minus e0 e1) s = binOp (-)  e0 e1 s
+evalExp (Times e0 e1) s = binOp (*)  e0 e1 s
+evalExp (Div e0 e1)   s = binOp divv e0 e1 s
 evalExp (EAssgn v e)  s = case evalExp e s of
                             Left r           -> Left r
                             Right (n :!: s') -> Right (n :!: update v n s')
-evalExp (ESeq e0 e1)  s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n1 :!: s'')
+evalExp (ESeq e0 e1)  s = binOp seqq e0 e1 s
 -- Expresiones booleanas
 evalExp BTrue         s = Right (True :!: s)
 evalExp BFalse        s = Right (False :!: s)
-evalExp (Lt e0 e1)    s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 < n1 :!: s'')
-evalExp (Gt e0 e1)    s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 > n1 :!: s'')
-evalExp (And p0 p1)   s = case evalExp p0 s of
-                            Left r            -> Left r
-                            Right (b0 :!: s') -> case evalExp p1 s' of
-                                                   Left r             -> Left r
-                                                   Right (b1 :!: s'') -> Right (b0 && b1 :!: s'')
-evalExp (Or p0 p1)    s = case evalExp p0 s of
-                            Left r            -> Left r
-                            Right (b0 :!: s') -> case evalExp p1 s' of
-                                                   Left r             -> Left r
-                                                   Right (b1 :!: s'') -> Right ((b0 || b1) :!: s'')
+evalExp (Lt e0 e1)    s = binOp (<)  e0 e1 s
+evalExp (Gt e0 e1)    s = binOp (>)  e0 e1 s
+evalExp (And p0 p1)   s = binOp (&&) p0 p1 s
+evalExp (Or p0 p1)    s = binOp (||) p0 p1 s
 evalExp (Not p)       s = case evalExp p s of
                             Left r           -> Left r
                             Right (b :!: s') -> Right (not b :!: s')
-evalExp (Eq e0 e1)    s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 == n1 :!: s'')
-evalExp (NEq e0 e1)   s = case evalExp e0 s of
-                            Left r            -> Left r
-                            Right (n0 :!: s') -> case evalExp e1 s' of
-                                                   Left r             -> Left r
-                                                   Right (n1 :!: s'') -> Right (n0 /= n1 :!: s'')
+evalExp (Eq e0 e1)    s = binOp (==) e0 e1 s
+evalExp (NEq e0 e1)   s = binOp (/=) e0 e1 s
