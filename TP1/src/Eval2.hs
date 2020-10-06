@@ -58,7 +58,7 @@ stepComm (While b c)          s = case evalExp b s of
 
 -- Evalúa una expresión
 
--- Funcioes auxiliares:
+-- Funciones auxiliares:
 -- Operadores binarios
 binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Either Error (Pair b State)
 binOp f e0 e1 s = case evalExp e0 s of
