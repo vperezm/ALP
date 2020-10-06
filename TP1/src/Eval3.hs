@@ -27,7 +27,6 @@ update x v s = (M.insert x v (Prelude.fst s), Prelude.snd s)
 
 -- AL: Darles esta signatura como hint?
 -- Suma un costo dado al estado
--- Completar la definición
 addWork :: Integer -> State -> State
 addWork n s = (Prelude.fst s, Prelude.snd s + n)
 
