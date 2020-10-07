@@ -60,7 +60,7 @@ stepComm (While b c)          s = case evalExp b s of
 
 -- Funciones auxiliares:
 -- Operadores unarios
-unOp :: (a -> b) -> Exp a -> State -> Either Error (Pair b State)
+unOp :: (a -> a) -> Exp a -> State -> Either Error (Pair a State)
 unOp f e s = case evalExp e s of
                Left r           -> Left r
                Right (n :!: s') -> Right (f n :!: s')
@@ -71,12 +71,12 @@ binOp f e0 e1 s = case evalExp e0 s of
                     Right (n0 :!: s') -> case evalExp e1 s' of
                                            Left r             -> Left r
                                            Right (n1 :!: s'') -> Right (f n0 n1 :!: s'')
--- División
+-- Operador para división
 divv :: Int -> Int -> Int
 divv n0 n1 = case n1 of
              0 -> error "División por 0"
              _ -> n0 `div` n1
--- Secuencia de expresiones enteras
+-- Operador para secuencia de expresiones enteras
 seqq :: Int -> Int -> Int
 seqq n0 n1 = n1
 
@@ -86,7 +86,7 @@ evalExp (Const n)     s = Right (n :!: s)
 evalExp (Var v)       s = case lookfor v s of
                             Left _  -> Left UndefVar
                             Right n -> Right (n :!: s)
-evalExp (UMinus e)    s = unOp (negate) e s
+evalExp (UMinus e)    s = unOp negate  e   s
 evalExp (Plus e0 e1)  s = binOp (+)  e0 e1 s
 evalExp (Minus e0 e1) s = binOp (-)  e0 e1 s
 evalExp (Times e0 e1) s = binOp (*)  e0 e1 s
@@ -102,6 +102,6 @@ evalExp (Lt e0 e1)    s = binOp (<)  e0 e1 s
 evalExp (Gt e0 e1)    s = binOp (>)  e0 e1 s
 evalExp (And p0 p1)   s = binOp (&&) p0 p1 s
 evalExp (Or p0 p1)    s = binOp (||) p0 p1 s
-evalExp (Not p)       s = unOp (not) p s
+evalExp (Not p)       s = unOp  not    p   s
 evalExp (Eq e0 e1)    s = binOp (==) e0 e1 s
 evalExp (NEq e0 e1)   s = binOp (/=) e0 e1 s
