@@ -25,7 +25,6 @@ lookfor v s = case M.lookup v (Prelude.fst s) of
 update :: Variable -> Int -> State -> State
 update x v s = (M.insert x v (Prelude.fst s), Prelude.snd s)
 
--- AL: Darles esta signatura como hint?
 -- Suma un costo dado al estado
 addWork :: Integer -> State -> State
 addWork n s = (Prelude.fst s, Prelude.snd s + n)
@@ -64,11 +63,11 @@ stepComm (While b c)          s = case evalExp b s of
 -- Evalúa una expresión
 
 -- Funciones auxiliares:
--- Operadores binarios
-binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Either Error (Pair b State)
-binOp f e0 e1 s = case evalExp e0 s of
-                    Left r            -> Left r
-                    Right (n0 :!: s') -> case evalExp e1 s' of
+-- Operadores binarios (con el trabajo a sumar como parámetro)
+binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Integer -> Either Error (Pair b State)
+binOp f e0 e1 s w = case evalExp e0 (addWork w s) of
+                      Left r            -> Left r
+                      Right (n0 :!: s') -> case evalExp e1 s' of
                                            Left r             -> Left r
                                            Right (n1 :!: s'') -> Right (f n0 n1 :!: s'')
 -- División
@@ -89,23 +88,23 @@ evalExp (Var v)       s = case lookfor v s of
 evalExp (UMinus e)    s = case evalExp e s of
                             Left r           -> Left r
                             Right (n :!: s') -> Right (-n :!: addWork 1 s')
-evalExp (Plus e0 e1)  s = binOp (+)  e0 e1 (addWork 1 s)
-evalExp (Minus e0 e1) s = binOp (-)  e0 e1 (addWork 1 s)
-evalExp (Times e0 e1) s = binOp (*)  e0 e1 (addWork 2 s)
-evalExp (Div e0 e1)   s = binOp divv e0 e1 (addWork 2 s)
+evalExp (Plus e0 e1)  s = binOp (+)  e0 e1 s 1
+evalExp (Minus e0 e1) s = binOp (-)  e0 e1 s 1
+evalExp (Times e0 e1) s = binOp (*)  e0 e1 s 2
+evalExp (Div e0 e1)   s = binOp divv e0 e1 s 2
 evalExp (EAssgn v e)  s = case evalExp e s of
                             Left r           -> Left r
                             Right (n :!: s') -> Right (n :!: update v n s')
-evalExp (ESeq e0 e1)  s = binOp seqq e0 e1 s
+evalExp (ESeq e0 e1)  s = binOp seqq e0 e1 s 0
 -- Expresiones booleanas
 evalExp BTrue         s = Right (True :!: s)
 evalExp BFalse        s = Right (False :!: s)
-evalExp (Lt e0 e1)    s = binOp (<)  e0 e1 (addWork 1 s)
-evalExp (Gt e0 e1)    s = binOp (>)  e0 e1 (addWork 1 s)
-evalExp (And p0 p1)   s = binOp (&&) p0 p1 (addWork 1 s)
-evalExp (Or p0 p1)    s = binOp (||) p0 p1 (addWork 1 s)
+evalExp (Lt e0 e1)    s = binOp (<)  e0 e1 s 1
+evalExp (Gt e0 e1)    s = binOp (>)  e0 e1 s 1
+evalExp (And p0 p1)   s = binOp (&&) p0 p1 s 1
+evalExp (Or p0 p1)    s = binOp (||) p0 p1 s 1
 evalExp (Not p)       s = case evalExp p s of
                             Left r           -> Left r
                             Right (b :!: s') -> Right (not b :!: addWork 1 s')
-evalExp (Eq e0 e1)    s = binOp (==) e0 e1 (addWork 1 s)
-evalExp (NEq e0 e1)   s = binOp (/=) e0 e1 (addWork 1 s)
+evalExp (Eq e0 e1)    s = binOp (==) e0 e1 s 1
+evalExp (NEq e0 e1)   s = binOp (/=) e0 e1 s 1
