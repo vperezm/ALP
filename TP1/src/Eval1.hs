@@ -63,7 +63,7 @@ binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Pair b State
 binOp f e0 e1 s = let (n0 :!: s')  = evalExp e0 s
                       (n1 :!: s'') = evalExp e1 s'
                   in (f n0 n1 :!: s'')
--- Operador para secuencia de enteros
+-- Operador para secuencia de expresiones enteras
 seqq :: Int -> Int -> Int
 seqq n0 n1 = n1
 
