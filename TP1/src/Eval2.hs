@@ -59,6 +59,11 @@ stepComm (While b c)          s = case evalExp b s of
 -- Evalúa una expresión
 
 -- Funciones auxiliares:
+-- Operadores unarios
+unOp :: (a -> b) -> Exp a -> State -> Either Error (Pair b State)
+unOp f e s = case evalExp e s of
+               Left r           -> Left r
+               Right (n :!: s') -> Right (f n :!: s')
 -- Operadores binarios
 binOp :: (a -> a -> b) -> Exp a -> Exp a -> State -> Either Error (Pair b State)
 binOp f e0 e1 s = case evalExp e0 s of
@@ -81,9 +86,7 @@ evalExp (Const n)     s = Right (n :!: s)
 evalExp (Var v)       s = case lookfor v s of
                             Left _  -> Left UndefVar
                             Right n -> Right (n :!: s)
-evalExp (UMinus e)    s = case evalExp e s of
-                            Left r           -> Left r
-                            Right (n :!: s') -> Right (-n :!: s')
+evalExp (UMinus e)    s = unOp (negate) e s
 evalExp (Plus e0 e1)  s = binOp (+)  e0 e1 s
 evalExp (Minus e0 e1) s = binOp (-)  e0 e1 s
 evalExp (Times e0 e1) s = binOp (*)  e0 e1 s
@@ -99,8 +102,6 @@ evalExp (Lt e0 e1)    s = binOp (<)  e0 e1 s
 evalExp (Gt e0 e1)    s = binOp (>)  e0 e1 s
 evalExp (And p0 p1)   s = binOp (&&) p0 p1 s
 evalExp (Or p0 p1)    s = binOp (||) p0 p1 s
-evalExp (Not p)       s = case evalExp p s of
-                            Left r           -> Left r
-                            Right (b :!: s') -> Right (not b :!: s')
+evalExp (Not p)       s = unOp (not) p s
 evalExp (Eq e0 e1)    s = binOp (==) e0 e1 s
 evalExp (NEq e0 e1)   s = binOp (/=) e0 e1 s
