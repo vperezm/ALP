@@ -80,7 +80,7 @@ module Common where
              | VNum NumVal
            deriving (Show, Eq)
 
-  -- Valores Numericos, Sección 10
+  -- Valores Numéricos, Sección 10
   data NumVal = NZero | NSuc NumVal deriving (Show, Eq)
 
   -- Contextos del tipado

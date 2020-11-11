@@ -1,11 +1,11 @@
 module Simplytyped
   ( conversion
-  ,    -- conversion a terminos localmente sin nombre
+  ,    -- conversión a términos localmente sin nombres
     eval
   ,          -- evaluador
     infer
   ,         -- inferidor de tipos
-    quote          -- valores -> terminos
+    quote          -- valores -> términos
   )
 where
 
@@ -16,7 +16,7 @@ import           Text.PrettyPrint.HughesPJ      ( render )
 import           PrettyPrinter
 import           Common
 
--- conversion a términos localmente sin nombres
+-- conversión a términos localmente sin nombres
 conversion :: LamTerm -> Term
 conversion = conversion' []
 
@@ -56,7 +56,7 @@ eval e (u        :@: v      ) = case eval e u of
 quote :: Value -> Term
 quote (VLam t f) = Lam t f
 
-----------------------
+-----------------------
 --- type checker
 -----------------------
 
@@ -74,8 +74,8 @@ err = Left
 (>>=)
   :: Either String Type -> (Type -> Either String Type) -> Either String Type
 (>>=) v f = either Left f v
--- fcs. de error
 
+-- fcs. de error
 matchError :: Type -> Type -> Either String Type
 matchError t1 t2 =
   err

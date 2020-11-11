@@ -1,6 +1,6 @@
 module PrettyPrinter
   ( printTerm
-  ,     -- pretty printer para terminos
+  ,     -- pretty printer para términos
     printType     -- pretty printer para tipos
   )
 where
@@ -20,8 +20,7 @@ parensIf :: Bool -> Doc -> Doc
 parensIf True  = parens
 parensIf False = id
 
--- pretty-printer de términos
-
+-- pretty printer de términos
 pp :: Int -> [String] -> Term -> Doc
 pp ii vs (Bound k         ) = text (vs !! (ii - k - 1))
 pp _  _  (Free  (Global s)) = text s
@@ -47,7 +46,7 @@ isApp :: Term -> Bool
 isApp (_ :@: _) = True
 isApp _         = False
 
--- pretty-printer de tipos
+-- pretty printer de tipos
 printType :: Type -> Doc
 printType EmptyT = text "E"
 printType (FunT t1 t2) =
@@ -67,4 +66,3 @@ fv (Lam _   u       ) = fv u
 ---
 printTerm :: Term -> Doc
 printTerm t = pp 0 (filter (\v -> not $ elem v (fv t)) vars) t
-
