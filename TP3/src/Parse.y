@@ -24,10 +24,12 @@ import Data.Char
     '->'    { TArrow }
     VAR     { TVar $$ }
     TYPEE   { TTypeE }
+    TYPEU   { TTypeU }
     DEF     { TDef }
     LET     { TLet }
     IN      { TIn }
     AS      { TAs }
+    UNIT    { TUnit }
 
 
 %right VAR
@@ -58,9 +60,12 @@ NAbs    :: { LamTerm }
 
 Atom    :: { LamTerm }
         : VAR                          { LVar $1 }
+        | UNIT                         { LUnit }
         | '(' Exp ')'                  { $2 }
 
-Type    : TYPEE                        { EmptyT }
+Type    :: { Type }
+        : TYPEE                        { EmptyT }
+        | TYPEU                        { UnitT }
         | Type '->' Type               { FunT $1 $3 }
         | '(' Type ')'                 { $2 }
 
@@ -98,6 +103,7 @@ happyError = \ s i -> Failed $ "Línea "++(show (i::LineNumber))++": Error de pa
 
 data Token = TVar String
                | TTypeE
+               | TTypeU
                | TDef
                | TAbs
                | TDot
@@ -110,6 +116,7 @@ data Token = TVar String
                | TLet
                | TIn
                | TAs
+               | TUnit
                deriving Show
 
 ----------------------------------
@@ -134,10 +141,12 @@ lexer cont s = case s of
                      "Línea "++(show line)++": No se puede reconocer "++(show $ take 10 unknown)++ "..."
                     where lexVar cs = case span isAlpha cs of
                               ("E",rest)    -> cont TTypeE rest
+                              ("Unit",rest) -> cont TTypeU rest
                               ("def",rest)  -> cont TDef rest
                               ("let",rest)  -> cont TLet rest
                               ("in", rest)  -> cont TIn rest
                               ("as", rest)  -> cont TAs rest
+                              ("unit",rest) -> cont TUnit rest
                               (var,rest)    -> cont (TVar var) rest
                           consumirBK anidado cl cont s = case s of
                               ('-':('-':cs)) -> consumirBK anidado cl cont $ dropWhile ((/=) '\n') cs
