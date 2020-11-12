@@ -26,8 +26,8 @@ pp ii vs (Bound k         ) = text (vs !! (ii - k - 1))
 pp _  _  (Free  (Global s)) = text s
 
 pp ii vs (i :@: c         ) = sep
-  [ parensIf (isLam i) (pp ii vs i)
-  , nest 1 (parensIf (isLam c || isApp c) (pp ii vs c))
+  [ parensIf (isLam i || isLet i) (pp ii vs i)
+  , nest 1 (parensIf (isLam c || isLet c || isApp c) (pp ii vs c))
   ]
 pp ii vs (Lam t c) =
   text "\\"
@@ -37,17 +37,25 @@ pp ii vs (Lam t c) =
     <> text ". "
     <> pp (ii + 1) vs c
 pp ii vs (Let t1 t2) =
-  text "let"
+  text "let "
     <> text(vs !! ii)
-    <> text "="
+    <> text " = "
     <> pp (ii + 1) vs t1
-    <> text "in"
+    <> text " in "
     <> pp (ii + 1) vs t2
+pp ii vs (As u t) =
+  pp ii vs u
+    <> text " as "
+    <> printType t
 
 
 isLam :: Term -> Bool
 isLam (Lam _ _) = True
 isLam _         = False
+
+isLet :: Term -> Bool
+isLet (Let _ _) = True
+isLet _         = False
 
 isApp :: Term -> Bool
 isApp (_ :@: _) = True
@@ -69,6 +77,8 @@ fv (Bound _         ) = []
 fv (Free  (Global n)) = [n]
 fv (t   :@: u       ) = fv t ++ fv u
 fv (Lam _   u       ) = fv u
+fv (Let   u1   u2   ) = fv u1 ++ fv u2
+fv (As    u    t    ) = fv u
 
 ---
 printTerm :: Term -> Doc
