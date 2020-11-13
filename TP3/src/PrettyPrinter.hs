@@ -53,8 +53,12 @@ pp ii vs (Pair u1 u2) =
     <> text ","
     <> pp ii vs u2
     <> text ")"
-pp ii vs (Fst u) = pp ii vs u
-pp ii vs (Snd u) = pp ii vs u
+pp ii vs (Fst u) =
+  text "fst "
+    <> pp ii vs u
+pp ii vs (Snd u) =
+  text "snd "
+    <> pp ii vs u
 
 
 isLam :: Term -> Bool

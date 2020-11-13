@@ -63,8 +63,12 @@ eval e (Let u1 u2)           = eval e (sub 0 u1 u2)
 eval e (As u t)              = eval e u
 eval e Unit                  = VUnit
 eval e (Pair u1 u2)          = VPair (eval e u1) (eval e u2)
-eval e (Fst u)               = eval e u
-eval e (Snd u)               = eval e u
+eval e (Fst u)               = case eval e u of
+  VPair a b -> a
+  _         -> error "Error de tipo en run-time, verificar type checker"
+eval e (Snd u)               = case eval e u of
+  VPair a b -> b
+  _         -> error "Error de tipo en run-time, verificar type checker"
 
 -----------------------
 --- quoting
@@ -104,6 +108,12 @@ matchError t1 t2 =
     ++ render (printType t2)
     ++ " fue inferido."
 
+pairError :: Type -> Either String Type
+pairError t = err
+  $ "se esperaba (a,b), pero "
+  ++ render (printType t)
+  ++ " fue inferido."
+
 notfunError :: Type -> Either String Type
 notfunError t1 = err $ render (printType t1) ++ " no puede ser aplicado."
 
@@ -124,6 +134,10 @@ infer' c e (Let u1 u2)  = infer' c e u1 >>= \tu1 -> infer' (tu1:c) e u2 >>= \tu2
 infer' c e (As u t)     = infer' c e u >>= \tu -> if tu == t then ret t else matchError t tu
 infer' c e Unit         = ret UnitT
 infer' c e (Pair u1 u2) = infer' c e u1 >>= \tu1 -> infer' c e u2 >>= \tu2 -> ret $ PairT tu1 tu2
-infer' c e (Fst u)      = infer' c e u
-infer' c e (Snd u)      = infer' c e u
+infer' c e (Fst u)      = infer' c e u >>= \tu -> case tu of
+  PairT a b -> ret a
+  _         -> pairError tu
+infer' c e (Snd u)      = infer' c e u >>= \tu -> case tu of
+  PairT a b -> ret b
+  _         -> pairError tu
 ----------------------------------

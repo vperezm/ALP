@@ -56,8 +56,8 @@ Exp     :: { LamTerm }
 
 Pair    :: { LamTerm }
         : '(' Exp ',' Exp ')'          { LPair $2 $4 }
-        | FST '(' Exp ',' Exp ')'      { LFst $3 }
-        | SND '(' Exp ',' Exp ')'      { LSnd $5 }
+        | FST Pair                     { LFst $2 }
+        | SND Pair                     { LSnd $2 }
         | As                           { $1 }
 
 As      :: { LamTerm }
