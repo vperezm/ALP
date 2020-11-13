@@ -47,6 +47,14 @@ pp ii vs (As u t) =
     <> text " as "
     <> printType t
 pp ii vs Unit = text "unit"
+pp ii vs (Pair u1 u2) =
+  text "("
+    <> pp ii vs u1
+    <> text ","
+    <> pp ii vs u2
+    <> text ")"
+pp ii vs (Fst u) = pp ii vs u
+pp ii vs (Snd u) = pp ii vs u
 
 
 isLam :: Term -> Bool
@@ -67,6 +75,8 @@ printType EmptyT = text "E"
 printType UnitT  = text "Unit"
 printType (FunT t1 t2) =
   sep [parensIf (isFun t1) (printType t1), text "->", printType t2]
+printType (PairT t1 t2) =
+  sep [text "(", printType t1, text ",", printType t2, text ")"]
 
 
 isFun :: Type -> Bool
@@ -81,6 +91,9 @@ fv (Lam _ u)         = fv u
 fv (Let u1 u2)       = fv u1 ++ fv u2
 fv (As u t)          = fv u
 fv Unit              = []
+fv (Pair u1 u2)      = fv u1 ++ fv u2
+fv (Fst u)           = fv u
+fv (Snd u)           = fv u
 
 ---
 printTerm :: Term -> Doc
