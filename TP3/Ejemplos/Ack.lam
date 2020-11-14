@@ -1,0 +1,3 @@
+def F = \a:Nat->Nat.\n:Nat. R (a (suc 0)) (\p:Nat. \q:Nat. a p) n
+
+def Ack = \m:Nat. R (\n:Nat. suc n) (\g:Nat->Nat. \h:Nat. F g) m

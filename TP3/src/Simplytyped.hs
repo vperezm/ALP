@@ -171,6 +171,6 @@ infer' c e (Rec u1 u2 u3) = infer' c e u1 >>= \tu1 -> infer' c e u2 >>= \tu2 -> 
     FunT t1 (FunT NatT t2) -> if (t1 == tu1) && (t2 == tu1)
                               then ret tu1
                               else matchError (FunT tu1 (FunT NatT tu1)) tu2
-    _                      -> notfunError tu2
+    _                      -> matchError (FunT tu1 (FunT NatT tu1)) tu2
   _    -> recError tu3
 ----------------------------------
