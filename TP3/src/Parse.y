@@ -43,10 +43,10 @@ import Data.Char
 %left '='
 %right '->'
 %right '\\' '.' LET
-%nonassoc FST SND
-%nonassoc SUC
-%left REC
 %left AS
+%left REC
+%nonassoc SUC
+%nonassoc FST SND
 
 %%
 
