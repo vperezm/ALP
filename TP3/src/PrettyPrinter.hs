@@ -25,8 +25,8 @@ pp :: Int -> [String] -> Term -> Doc
 pp ii vs (Bound k)          = text (vs !! (ii - k - 1))
 pp _  _  (Free  (Global s)) = text s
 pp ii vs (i :@: c)          = sep
-  [ parensIf (isLam i || isLet i) (pp ii vs i)
-  , nest 1 (parensIf (isLam c || isLet c || isApp c) (pp ii vs c))
+  [ parensIf (isLam i || isLet i || isRec i) (pp ii vs i)
+  , nest 1 (parensIf (isLam c || isLet c || isRec c || isApp c) (pp ii vs c))
   ]
 pp ii vs (Lam t c) =
   text "\\"
@@ -59,6 +59,17 @@ pp ii vs (Fst u) =
 pp ii vs (Snd u) =
   text "snd "
     <> pp ii vs u
+pp ii vs Zero    = text "0"
+pp ii vs (Suc u) =
+  text "suc "
+    <> pp ii vs u
+pp ii vs (Rec u1 u2 u3) =
+  text "R "
+    <> pp ii vs u1
+    <> text " "
+    <> pp ii vs u2
+    <> text " "
+    <> pp ii vs u3
 
 
 isLam :: Term -> Bool
@@ -73,6 +84,10 @@ isLet :: Term -> Bool
 isLet (Let _ _) = True
 isLet _         = False
 
+isRec :: Term -> Bool
+isRec (Rec _ _ _) = True
+isRec _           = False
+
 -- pretty printer de tipos
 printType :: Type -> Doc
 printType EmptyT = text "E"
@@ -81,6 +96,7 @@ printType (FunT t1 t2) =
   sep [parensIf (isFun t1) (printType t1), text "->", printType t2]
 printType (PairT t1 t2) =
   sep [text "(", printType t1, text ",", printType t2, text ")"]
+printType NatT   = text "Nat"
 
 
 isFun :: Type -> Bool
@@ -98,6 +114,9 @@ fv Unit              = []
 fv (Pair u1 u2)      = fv u1 ++ fv u2
 fv (Fst u)           = fv u
 fv (Snd u)           = fv u
+fv Zero              = []
+fv (Suc u)           = fv u
+fv (Rec u1 u2 u3)    = fv u1 ++ fv u3
 
 ---
 printTerm :: Term -> Doc
