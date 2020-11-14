@@ -53,7 +53,7 @@ sub i t (Fst u)               = Fst (sub i t u)
 sub i t (Snd u)               = Snd (sub i t u)
 sub i t Zero                  = Zero
 sub i t (Suc u)               = Suc (sub i t u)
-sub i t (Rec t1 t2 t3)        = Rec (sub i t t1) t2 t3
+sub i t (Rec t1 t2 t3)        = Rec (sub i t t1) (sub i t t2) (sub i t t3)
 
 -- evaluador de términos
 eval :: NameEnv Value Type -> Term -> Value
@@ -79,7 +79,8 @@ eval e Zero                  = VNum NZero
 eval e (Suc u)               = VNum (NSuc (evalNum (eval e u)))
 eval e (Rec u1 u2 u3)        = case eval e u3 of
   VNum NZero    -> eval e u1
-  VNum (NSuc u) -> eval e ((u2 :@: (Rec u1 u2 u')) :@: u') where u' = quote (VNum u)
+  VNum (NSuc u) -> eval e ((u2 :@: (Rec u1 u2 u')) :@: u')
+    where u' = quote (VNum u)
 
 evalNum :: Value -> NumVal
 evalNum (VNum NZero)    = NZero
@@ -125,17 +126,23 @@ matchError t1 t2 =
     ++ render (printType t2)
     ++ " fue inferido."
 
-pairError :: Type -> Either String Type
-pairError t = err
-  $ "se esperaba (a,b), pero "
-  ++ render (printType t)
-  ++ " fue inferido."
-
 notfunError :: Type -> Either String Type
 notfunError t1 = err $ render (printType t1) ++ " no puede ser aplicado."
 
 notfoundError :: Name -> Either String Type
 notfoundError n = err $ show n ++ " no está definida."
+
+pairError :: Type -> Either String Type
+pairError t = err
+  $ "se esperaba un par, pero "
+  ++ render (printType t)
+  ++ " fue inferido."
+
+recError :: Type -> Either String Type
+recError t = err
+  $ "el iterador debería ser natural, pero "
+  ++ render (printType t)
+  ++ " fue inferido"
 
 infer' :: Context -> NameEnv Value Type -> Term -> Either String Type
 infer' c _ (Bound i)    = ret (c !! i)
@@ -159,4 +166,11 @@ infer' c e (Snd u)        = infer' c e u >>= \tu -> case tu of
   _         -> pairError tu
 infer' c e Zero           = ret NatT
 infer' c e (Suc u)        = infer' c e u >>= \tu -> if tu == NatT then ret NatT else matchError NatT tu
+infer' c e (Rec u1 u2 u3) = infer' c e u1 >>= \tu1 -> infer' c e u2 >>= \tu2 -> infer' c e u3 >>= \tu3 -> case tu3 of
+  NatT -> case tu2 of
+    FunT t1 (FunT NatT t2) -> if (t1 == tu1) && (t2 == tu1)
+                              then ret tu1
+                              else matchError (FunT tu1 (FunT NatT tu1)) tu2
+    _                      -> notfunError tu2
+  _    -> recError tu3
 ----------------------------------

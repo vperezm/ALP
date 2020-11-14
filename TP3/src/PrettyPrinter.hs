@@ -65,12 +65,9 @@ pp ii vs (Suc u) =
     <> pp ii vs u
 pp ii vs (Rec u1 u2 u3) =
   text "R "
-    <> pp ii vs u1
-    <> text " "
-    <> pp ii vs u2
-    <> text " "
-    <> pp ii vs u3
-
+    <> sep [parensIf (isLam u1 || isLet u1 || isRec u1 || isApp u1) (pp ii vs u1)
+           ,parensIf (isLam u2 || isLet u2 || isRec u2 || isApp u2) (pp ii vs u2)
+           ,pp ii vs u3]
 
 isLam :: Term -> Bool
 isLam (Lam _ _) = True
@@ -116,7 +113,7 @@ fv (Fst u)           = fv u
 fv (Snd u)           = fv u
 fv Zero              = []
 fv (Suc u)           = fv u
-fv (Rec u1 u2 u3)    = fv u1 ++ fv u3
+fv (Rec u1 u2 u3)    = fv u1 ++ fv u2 ++ fv u3
 
 ---
 printTerm :: Term -> Doc

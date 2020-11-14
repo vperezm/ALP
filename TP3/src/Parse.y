@@ -64,7 +64,7 @@ As      :: { LamTerm }
         | Rec                          { $1 }
 
 Rec     :: { LamTerm }
-        : REC Exp Exp Exp              { LRec $2 $3 $4 }
+        : REC Atom Atom Exp            { LRec $2 $3 $4 }
         | Suc                          { $1 }
 
 Suc     :: { LamTerm }
@@ -177,7 +177,7 @@ lexer cont s = case s of
                     where lexVar cs = case span isAlpha cs of
                               ("E",rest)    -> cont TTypeE rest
                               ("Unit",rest) -> cont TTypeU rest
-                              ("Nat",rest) -> cont TTypeN rest
+                              ("Nat",rest)  -> cont TTypeN rest
                               ("def",rest)  -> cont TDef rest
                               ("let",rest)  -> cont TLet rest
                               ("in", rest)  -> cont TIn rest
@@ -186,7 +186,7 @@ lexer cont s = case s of
                               ("fst", rest) -> cont TFst rest
                               ("snd", rest) -> cont TSnd rest
                               ("suc", rest) -> cont TSuc rest
-                              ("R", rest) -> cont TRec rest
+                              ("R", rest)   -> cont TRec rest
                               (var,rest)    -> cont (TVar var) rest
                           consumirBK anidado cl cont s = case s of
                               ('-':('-':cs)) -> consumirBK anidado cl cont $ dropWhile ((/=) '\n') cs
