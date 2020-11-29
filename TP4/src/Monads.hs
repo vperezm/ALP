@@ -3,7 +3,7 @@ module Monads where
 import           AST
 
 -- Clases de mónadas que proveen las operaciones necesarias
--- para implementar los evaluadores.
+-- para implementar los evaluadores
 
 -- Clase para representar mónadas con estado de variables
 class Monad m => MonadState m where
@@ -18,5 +18,5 @@ class Monad m => MonadError m where
     throw :: Error -> m a
 
 -- Ejercicio 3.b: Dar una clase que provea las operaciones necesarias para
--- llevar el costo de las operaciones efectuadas. Llamela MonadCost.
+-- llevar el costo de las operaciones efectuadas. Llámela MonadCost
 -- COMPLETAR

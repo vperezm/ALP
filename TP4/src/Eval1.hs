@@ -43,23 +43,21 @@ instance MonadState State where
     where lookfor' v s = fromJust $ M.lookup v s
   update v i = State (\s -> (() :!: update' v i s)) where update' = M.insert
 
--- Ejercicio 1.b: Implementar el evaluador utilizando la monada State
+-- Ejercicio 1.b: Implementar el evaluador utilizando la mónada State
 
--- Evalua un programa en el estado nulo
+-- Evalúa un programa en el estado nulo
 eval :: Comm -> Env
 eval p = snd (runState (stepCommStar p) initEnv)
 
--- Evalua multiples pasos de un comando, hasta alcanzar un Skip
+-- Evalúa múltiples pasos de un comando, hasta alcanzar un Skip
 stepCommStar :: MonadState m => Comm -> m ()
 stepCommStar Skip = return ()
 stepCommStar c    = stepComm c >>= \c' -> stepCommStar c'
 
--- Evalua un paso de un comando
+-- Evalúa un paso de un comando
 stepComm :: MonadState m => Comm -> m Comm
 stepComm = undefined
 
--- Evalua una expresion
+-- Evalúa una expresión
 evalExp :: MonadState m => Exp a -> m a
 evalExp = undefined
-
-

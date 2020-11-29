@@ -3,7 +3,7 @@ module AST where
 -- Identificadores de Variable
 type Variable = String
 
--- Expresiones, aritmeticas y booleanas
+-- Expresiones, aritméticas y booleanas
 data Exp a where
   -- Int
   Const ::Int -> Exp Int
@@ -13,6 +13,8 @@ data Exp a where
   Minus ::Exp Int -> Exp Int -> Exp Int
   Times ::Exp Int -> Exp Int -> Exp Int
   Div ::Exp Int -> Exp Int -> Exp Int
+  EAssgn ::Variable -> Exp Int -> Exp Int
+  ESeq ::Exp Int -> Exp Int -> Exp Int
   -- Bool
   BTrue ::Exp Bool
   BFalse ::Exp Bool
@@ -23,14 +25,12 @@ data Exp a where
   Not ::Exp Bool -> Exp Bool
   Eq ::Exp Int -> Exp Int -> Exp Bool
   NEq ::Exp Int -> Exp Int -> Exp Bool
-  EAssgn ::Variable -> Exp Int -> Exp Int
-  ESeq ::Exp Int -> Exp Int -> Exp Int
 
 deriving instance Show (Exp a)
 deriving instance Eq (Exp a)
 
 -- Comandos (sentencias)
--- Observar que solo se permiten variables de un tipo (entero)
+-- Observar que sólo se permiten variables de un tipo (entero)
 data Comm
   = Skip
   | Let Variable (Exp Int)

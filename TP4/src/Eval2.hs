@@ -24,7 +24,6 @@ initEnv = M.empty
 newtype StateError a =
   StateError { runStateError :: Env -> Either Error ( Pair a Env) }
 
-
 -- Para calmar al GHC
 instance Functor StateError where
   fmap = liftM
@@ -44,21 +43,21 @@ instance Monad StateError where
 -- Ejercicio 2.c: Dar una instancia de MonadState para StateError:
 -- COMPLETAR
 
--- Ejercicio 2.d: Implementar el evaluador utilizando la monada StateError.
--- Evalua un programa en el estado nulo
+-- Ejercicio 2.d: Implementar el evaluador utilizando la mónada StateError
+
+-- Evalúa un programa en el estado nulo
 eval :: Comm -> Either Error Env
 eval = undefined
 
--- Evalua multiples pasos de un comando, hasta alcanzar un Skip
+-- Evalúa múltiples pasos de un comando, hasta alcanzar un Skip
 stepCommStar :: (MonadState m, MonadError m) => Comm -> m ()
 stepCommStar Skip = return ()
 stepCommStar c    = stepComm c >>= \c' -> stepCommStar c'
 
--- Evalua un paso de un comando
+-- Evalúa un paso de un comando
 stepComm :: (MonadState m, MonadError m) => Comm -> m Comm
 stepComm = undefined
 
--- Evalua una expresion
+-- Evalúa una expresión
 evalExp :: (MonadState m, MonadError m) => Exp a -> m a
 evalExp = undefined
-
