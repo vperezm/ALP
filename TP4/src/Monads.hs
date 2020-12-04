@@ -19,4 +19,6 @@ class Monad m => MonadError m where
 
 -- Ejercicio 3.b: Dar una clase que provea las operaciones necesarias para
 -- llevar el costo de las operaciones efectuadas. Llámela MonadCost
--- COMPLETAR
+class Monad m => MonadCost m where
+    -- Suma un costo dado al estado
+    addWork :: Cost -> m ()

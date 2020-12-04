@@ -102,8 +102,8 @@ evalExp (ESeq e0 e1)  = binOp seqq e0 e1
 -- Expresiones booleanas
 evalExp BTrue         = return True
 evalExp BFalse        = return False
-evalExp (Lt e0 e1)    = binOp (<) e0 e1
-evalExp (Gt e0 e1)    = binOp (>) e0 e1
+evalExp (Lt e0 e1)    = binOp (<)  e0 e1
+evalExp (Gt e0 e1)    = binOp (>)  e0 e1
 evalExp (And p0 p1)   = binOp (&&) p0 p1
 evalExp (Or p0 p1)    = binOp (||) p0 p1
 evalExp (Not p)       = unOp not p
