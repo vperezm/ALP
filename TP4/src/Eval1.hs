@@ -106,6 +106,6 @@ evalExp (Lt e0 e1)    = binOp (<)  e0 e1
 evalExp (Gt e0 e1)    = binOp (>)  e0 e1
 evalExp (And p0 p1)   = binOp (&&) p0 p1
 evalExp (Or p0 p1)    = binOp (||) p0 p1
-evalExp (Not p)       = unOp not p
+evalExp (Not p)       = unOp  not    p
 evalExp (Eq e0 e1)    = binOp (==) e0 e1
 evalExp (NEq e0 e1)   = binOp (/=) e0 e1
