@@ -47,7 +47,7 @@ instance MonadError StateError where
 -- Ejercicio 2.c: Dar una instancia de MonadState para StateError:
 instance MonadState StateError where
   lookfor v = StateError (\s -> case M.lookup v s of
-                                  Nothing -> Left UndefVar  -- no debería usarse throw?
+                                  Nothing -> Left UndefVar
                                   Just n  -> Right (n :!: s))
   update v i = StateError (\s -> Right ((() :!: update' v i s))) where update' = M.insert
 
@@ -122,6 +122,6 @@ evalExp (Lt e0 e1)    = binOp (<)  e0 e1
 evalExp (Gt e0 e1)    = binOp (>)  e0 e1
 evalExp (And p0 p1)   = binOp (&&) p0 p1
 evalExp (Or p0 p1)    = binOp (||) p0 p1
-evalExp (Not p)       = unOp not p
+evalExp (Not p)       = unOp  not    p
 evalExp (Eq e0 e1)    = binOp (==) e0 e1
 evalExp (NEq e0 e1)   = binOp (/=) e0 e1
