@@ -37,7 +37,7 @@ instance Applicative StateErrorCost where
 instance Monad StateErrorCost where
   return x = StateErrorCost (\s -> (\c -> Right (x :!: (s, c))))
   m >>= f = StateErrorCost (\s -> (\c -> case runStateErrorCost m s c of
-                                           Left r           -> Left r
+                                           Left r                 -> Left r
                                            Right (v :!: (s', c')) -> runStateErrorCost (f v) s' c'))
 
 -- Ejercicio 3.c: Dar una instancia de MonadCost para StateErrorCost
@@ -52,7 +52,7 @@ instance MonadError StateErrorCost where
 -- Ejercicio 3.e: Dar una instancia de MonadState para StateErrorCost
 instance MonadState StateErrorCost where
   lookfor v = StateErrorCost (\s -> (\c -> case M.lookup v s of
-                                             Nothing -> Left UndefVar  -- no debería usarse throw?
+                                             Nothing -> Left UndefVar
                                              Just n  -> Right (n :!: (s, c))))
   update v i = StateErrorCost (\s -> (\c -> Right ((() :!: (update' v i s, c)))))
                  where update' = M.insert
@@ -131,6 +131,6 @@ evalExp (Lt e0 e1)    = binOp (<)  e0 e1 1
 evalExp (Gt e0 e1)    = binOp (>)  e0 e1 1
 evalExp (And p0 p1)   = binOp (&&) p0 p1 1
 evalExp (Or p0 p1)    = binOp (||) p0 p1 1
-evalExp (Not p)       = unOp not p
+evalExp (Not p)       = unOp  not    p
 evalExp (Eq e0 e1)    = binOp (==) e0 e1 1
 evalExp (NEq e0 e1)   = binOp (/=) e0 e1 1
