@@ -1,0 +1,4 @@
+
+sepBy parsea 0 o mas strings separadas por "sep"
+
+symbol parsea un símbolo en específico entre espacios
